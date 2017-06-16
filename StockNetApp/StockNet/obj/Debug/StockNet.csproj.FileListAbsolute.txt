@@ -1,0 +1,12 @@
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\bin\Debug\StockNet.exe.config
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\bin\Debug\StockNet.exe
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\bin\Debug\StockNet.pdb
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.csprojResolveAssemblyReference.cache
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.frmStockNet.resources
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.Properties.Resources.resources
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.csproj.GenerateResource.Cache
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.exe
+C:\Users\Somnath\Dropbox\MRP\StockNet\StockNet\obj\Debug\StockNet.pdb
+C:\Users\Somnath\Dropbox\MRP\DataScienceMRP\StockNetApp\StockNet\bin\Debug\StockNet.exe.config
+C:\Users\Somnath\Dropbox\MRP\DataScienceMRP\StockNetApp\StockNet\obj\Debug\StockNet.exe
+C:\Users\Somnath\Dropbox\MRP\DataScienceMRP\StockNetApp\StockNet\obj\Debug\StockNet.pdb
