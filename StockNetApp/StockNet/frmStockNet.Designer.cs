@@ -113,6 +113,7 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.grpMapType = new System.Windows.Forms.GroupBox();
             this.label8 = new System.Windows.Forms.Label();
             this.nbrThreshhold = new System.Windows.Forms.NumericUpDown();
@@ -133,7 +134,19 @@
             this.cmdCorrelation = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.pnlGraph = new System.Windows.Forms.Panel();
-            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.cmdVisualizeCluster = new System.Windows.Forms.Button();
+            this.cmdIterate = new System.Windows.Forms.Button();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.dbgrdviewTransitionMatrix = new System.Windows.Forms.DataGridView();
+            this.dbgrdviewInflationMatrix = new System.Windows.Forms.DataGridView();
+            this.dbgrdviewExapansionMatrix = new System.Windows.Forms.DataGridView();
+            this.dbgrdviewAdjacencyMatrix = new System.Windows.Forms.DataGridView();
+            this.cmdInitializeMatrices = new System.Windows.Forms.Button();
+            this.chkCumulative = new System.Windows.Forms.CheckBox();
             this.tabControlStockNet.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -152,6 +165,11 @@
             this.grpMapType.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nbrThreshhold)).BeginInit();
             this.tabPage3.SuspendLayout();
+            this.tabPage4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewTransitionMatrix)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewInflationMatrix)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewExapansionMatrix)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewAdjacencyMatrix)).BeginInit();
             this.SuspendLayout();
             // 
             // txtDataPath
@@ -245,13 +263,13 @@
             this.tabControlStockNet.Controls.Add(this.tabPage1);
             this.tabControlStockNet.Controls.Add(this.tabPage2);
             this.tabControlStockNet.Controls.Add(this.tabPage3);
+            this.tabControlStockNet.Controls.Add(this.tabPage4);
             this.tabControlStockNet.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControlStockNet.Location = new System.Drawing.Point(0, 0);
             this.tabControlStockNet.Name = "tabControlStockNet";
             this.tabControlStockNet.SelectedIndex = 0;
             this.tabControlStockNet.Size = new System.Drawing.Size(1799, 802);
             this.tabControlStockNet.TabIndex = 3;
-            this.tabControlStockNet.SelectedIndexChanged += new System.EventHandler(this.tabControlStockNet_SelectedIndexChanged);
             // 
             // tabPage1
             // 
@@ -772,6 +790,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.chkCumulative);
             this.tabPage2.Controls.Add(this.pnlDegree);
             this.tabPage2.Controls.Add(this.cmdShowAllPath);
             this.tabPage2.Controls.Add(this.nbrApproximateExponent);
@@ -1115,6 +1134,10 @@
             this.columnHeader10.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeader10.Width = 81;
             // 
+            // columnHeader11
+            // 
+            this.columnHeader11.Text = "Closeness";
+            // 
             // grpMapType
             // 
             this.grpMapType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -1354,9 +1377,138 @@
             this.pnlGraph.Size = new System.Drawing.Size(1738, 714);
             this.pnlGraph.TabIndex = 0;
             // 
-            // columnHeader11
+            // tabPage4
             // 
-            this.columnHeader11.Text = "Closeness";
+            this.tabPage4.Controls.Add(this.cmdVisualizeCluster);
+            this.tabPage4.Controls.Add(this.cmdIterate);
+            this.tabPage4.Controls.Add(this.label17);
+            this.tabPage4.Controls.Add(this.label21);
+            this.tabPage4.Controls.Add(this.label19);
+            this.tabPage4.Controls.Add(this.label15);
+            this.tabPage4.Controls.Add(this.dbgrdviewTransitionMatrix);
+            this.tabPage4.Controls.Add(this.dbgrdviewInflationMatrix);
+            this.tabPage4.Controls.Add(this.dbgrdviewExapansionMatrix);
+            this.tabPage4.Controls.Add(this.dbgrdviewAdjacencyMatrix);
+            this.tabPage4.Controls.Add(this.cmdInitializeMatrices);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(1791, 776);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Clustering Calculation";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // cmdVisualizeCluster
+            // 
+            this.cmdVisualizeCluster.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdVisualizeCluster.Location = new System.Drawing.Point(1689, 727);
+            this.cmdVisualizeCluster.Name = "cmdVisualizeCluster";
+            this.cmdVisualizeCluster.Size = new System.Drawing.Size(75, 23);
+            this.cmdVisualizeCluster.TabIndex = 4;
+            this.cmdVisualizeCluster.Text = "View Cluster";
+            this.cmdVisualizeCluster.UseVisualStyleBackColor = true;
+            this.cmdVisualizeCluster.Click += new System.EventHandler(this.cmdVisualizeCluster_Click);
+            // 
+            // cmdIterate
+            // 
+            this.cmdIterate.Location = new System.Drawing.Point(1628, 416);
+            this.cmdIterate.Name = "cmdIterate";
+            this.cmdIterate.Size = new System.Drawing.Size(136, 23);
+            this.cmdIterate.TabIndex = 4;
+            this.cmdIterate.Text = "Iterate for Converging";
+            this.cmdIterate.UseVisualStyleBackColor = true;
+            this.cmdIterate.Click += new System.EventHandler(this.cmdIterate_Click);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(879, 21);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(84, 13);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Transition Matrix";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(868, 429);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(75, 13);
+            this.label21.TabIndex = 3;
+            this.label21.Text = "Inflation Matrix";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(20, 429);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(87, 13);
+            this.label19.TabIndex = 3;
+            this.label19.Text = "Expansion Matrix";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(20, 26);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(88, 13);
+            this.label15.TabIndex = 3;
+            this.label15.Text = "Adjacency Matrix";
+            // 
+            // dbgrdviewTransitionMatrix
+            // 
+            this.dbgrdviewTransitionMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dbgrdviewTransitionMatrix.Location = new System.Drawing.Point(871, 45);
+            this.dbgrdviewTransitionMatrix.Name = "dbgrdviewTransitionMatrix";
+            this.dbgrdviewTransitionMatrix.Size = new System.Drawing.Size(893, 345);
+            this.dbgrdviewTransitionMatrix.TabIndex = 2;
+            // 
+            // dbgrdviewInflationMatrix
+            // 
+            this.dbgrdviewInflationMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dbgrdviewInflationMatrix.Location = new System.Drawing.Point(871, 445);
+            this.dbgrdviewInflationMatrix.Name = "dbgrdviewInflationMatrix";
+            this.dbgrdviewInflationMatrix.Size = new System.Drawing.Size(893, 323);
+            this.dbgrdviewInflationMatrix.TabIndex = 2;
+            // 
+            // dbgrdviewExapansionMatrix
+            // 
+            this.dbgrdviewExapansionMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dbgrdviewExapansionMatrix.Location = new System.Drawing.Point(23, 445);
+            this.dbgrdviewExapansionMatrix.Name = "dbgrdviewExapansionMatrix";
+            this.dbgrdviewExapansionMatrix.Size = new System.Drawing.Size(820, 323);
+            this.dbgrdviewExapansionMatrix.TabIndex = 2;
+            // 
+            // dbgrdviewAdjacencyMatrix
+            // 
+            this.dbgrdviewAdjacencyMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dbgrdviewAdjacencyMatrix.Location = new System.Drawing.Point(23, 42);
+            this.dbgrdviewAdjacencyMatrix.Name = "dbgrdviewAdjacencyMatrix";
+            this.dbgrdviewAdjacencyMatrix.Size = new System.Drawing.Size(820, 348);
+            this.dbgrdviewAdjacencyMatrix.TabIndex = 2;
+            // 
+            // cmdInitializeMatrices
+            // 
+            this.cmdInitializeMatrices.Location = new System.Drawing.Point(1689, 16);
+            this.cmdInitializeMatrices.Name = "cmdInitializeMatrices";
+            this.cmdInitializeMatrices.Size = new System.Drawing.Size(75, 23);
+            this.cmdInitializeMatrices.TabIndex = 1;
+            this.cmdInitializeMatrices.Text = "Initialize Matrces";
+            this.cmdInitializeMatrices.UseVisualStyleBackColor = true;
+            this.cmdInitializeMatrices.Click += new System.EventHandler(this.cmdInitializeMatrices_Click);
+            // 
+            // chkCumulative
+            // 
+            this.chkCumulative.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkCumulative.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkCumulative.AutoSize = true;
+            this.chkCumulative.Location = new System.Drawing.Point(1635, 112);
+            this.chkCumulative.Name = "chkCumulative";
+            this.chkCumulative.Size = new System.Drawing.Size(69, 23);
+            this.chkCumulative.TabIndex = 14;
+            this.chkCumulative.Text = "Cumulative";
+            this.chkCumulative.UseVisualStyleBackColor = true;
+            this.chkCumulative.CheckedChanged += new System.EventHandler(this.chkCumulative_CheckedChanged);
             // 
             // frmStockNet
             // 
@@ -1394,6 +1546,12 @@
             this.grpMapType.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nbrThreshhold)).EndInit();
             this.tabPage3.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewTransitionMatrix)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewInflationMatrix)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewExapansionMatrix)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbgrdviewAdjacencyMatrix)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1505,6 +1663,19 @@
         private System.Windows.Forms.Panel pnlDegree;
         private System.Windows.Forms.Panel pnlGraph;
         private System.Windows.Forms.ColumnHeader columnHeader11;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Button cmdInitializeMatrices;
+        private System.Windows.Forms.DataGridView dbgrdviewAdjacencyMatrix;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.DataGridView dbgrdviewTransitionMatrix;
+        private System.Windows.Forms.DataGridView dbgrdviewExapansionMatrix;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.DataGridView dbgrdviewInflationMatrix;
+        private System.Windows.Forms.Button cmdIterate;
+        private System.Windows.Forms.Button cmdVisualizeCluster;
+        private System.Windows.Forms.CheckBox chkCumulative;
     }
 }
 

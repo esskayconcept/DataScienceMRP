@@ -36,6 +36,7 @@ namespace StockNet
         public Node()
         {
             ConnectionIndices = new List<int>();
+            CluserColor = Color.Yellow;
         }
         
         public void AddConnection(int ConnectionNodeIndex)
@@ -185,6 +186,8 @@ namespace StockNet
         
         public Point NodePoint;
 
+        public Color CluserColor;
+
         public void DrawNode(Graphics g)
         {
             Font fnt = ParentGraph.DrawingCanvas.Font;
@@ -195,7 +198,7 @@ namespace StockNet
 
             Rectangle r = new Rectangle(MidPoint.X - NodeCircleRadius, MidPoint.Y - NodeCircleRadius, NodeCircleRadius * 2, NodeCircleRadius * 2);
 
-            g.FillEllipse(Brushes.Yellow, r);
+            g.FillEllipse(new SolidBrush(CluserColor), r);
             g.DrawEllipse(Pens.Black, r);
 
             SizeF TickerSize = g.MeasureString(Ticker, fnt);
@@ -242,6 +245,7 @@ namespace StockNet
         private int _Diameter;
         private int _Radius;
         private int[] _DegreeCount;
+        private int[] _CumulativeDegreeCount;
         private int _MaxDegreeCount;
         private int _MaxDegree;
 
@@ -305,6 +309,7 @@ namespace StockNet
             _Density = 1.0 * NoOfEdges / NoOfPossibleEdges;
 
             _DegreeCount = new int[n];
+            _CumulativeDegreeCount = new int[n];
 
             foreach (Node nd in Nodes)
             {
@@ -313,7 +318,8 @@ namespace StockNet
 
             _MaxDegree = 0;
             _MaxDegreeCount = 0;
-
+            int DegreeSum = 0;
+            
             for (int i = 0; i < _DegreeCount.Length; i++)
             {
                 int D = _DegreeCount[i];
@@ -323,6 +329,10 @@ namespace StockNet
                     _MaxDegree = i;
                     _MaxDegreeCount = Math.Max(_MaxDegreeCount, D);
                 }
+
+                DegreeSum += D;
+
+                _CumulativeDegreeCount[i] = DegreeSum;
             }
 
             //Set the initial Poistion
@@ -431,6 +441,14 @@ namespace StockNet
             }
         }
 
+        public int[] CumulativeDegreeCount
+        {
+            get
+            {
+                return _CumulativeDegreeCount;
+            }
+        }
+
         public int MaxDegreeCount
         {
             get
@@ -446,7 +464,7 @@ namespace StockNet
                 return _MaxDegree;
             }
         }
-
+        
         private int DragNode = -1;
         
         private void DrawGraph(Graphics g)
@@ -554,6 +572,57 @@ namespace StockNet
             if(fldlg.ShowDialog() == DialogResult.OK)
             {
                 ExportNodeDetails(fldlg.FileName);
+            }
+        }
+
+        public double[,] AdjacencyMatrix
+        {
+            get
+            {
+                int n = Nodes.Count;
+
+                double[,] AM = new double[n, n];
+
+                for (int i = 0; i < n; i++)
+                {
+                    List<int> ChildNodes = Nodes[i].ConnectionIndices;
+
+                    AM[i, i] = 1;//Self loop is allowed
+
+                    for (int j = 0; j < ChildNodes.Count; j++)
+                    {
+                        AM[i, ChildNodes[j]] = 1;
+                    }
+                }
+
+                return AM;
+            }
+        }
+
+        public double[,] TransitionMatrix
+        {
+            get
+            {
+                double[,] d = AdjacencyMatrix;
+
+                int n = d.GetLength(0);
+                
+                for (int i = 0; i < n; i++)
+                {
+                    int Count = 0;
+
+                    for (int j = 0; j < n; j++)
+                    {
+                        Count += (int)d[j, i];
+                    }
+
+                    for (int j = 0; j < n; j++)
+                    {
+                        d[j, i] /= Count;
+                    }
+                }
+
+                return d;
             }
         }
     }

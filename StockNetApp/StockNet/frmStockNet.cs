@@ -23,6 +23,32 @@ namespace StockNet
 {
     public partial class frmStockNet : Form
     {
+        private double[,] CorrelationCoefficients;
+
+        private Graph CurrentGraph;
+
+        public frmStockNet()
+        {
+            InitializeComponent();
+        }
+
+        private void frmStockNet_Load(object sender, EventArgs e)
+        {
+            cboCorrelationAttribute.SelectedIndex = 0;
+
+            frmStockNet_Resize(sender, e);
+
+            CurrentGraph = new Graph();
+            CurrentGraph.DrawingCanvas = pnlGraph;
+            CurrentGraph.GraphToolTip = toolTipStockNet;
+        }
+
+        private void frmStockNet_Resize(object sender, EventArgs e)
+        {
+            pnlHeatmap.Height = pnlHeatmap.Width = Height - 100;
+            pnlHeatmap.Invalidate();
+        }
+
         #region Graphics Parameters
 
         private int LeftMargin = 20;
@@ -40,17 +66,6 @@ namespace StockNet
         int NodeCircleRadius = 20;
 
         #endregion
-
-        private delegate void PeriodHandler(DataTable dt);
-
-        private double[,] CorrelationCoefficients;
-
-        private Graph CurrentGraph;
-
-        public frmStockNet()
-        {
-            InitializeComponent();
-        }
 
         #region Data Loading
 
@@ -270,10 +285,12 @@ namespace StockNet
 
             return null;
         }
-        
+
         #endregion
 
         #region Period Refresh routines
+
+        private delegate void PeriodHandler(DataTable dt);
 
         private void SetPeriod(PeriodHandler SetIndicator)
         {
@@ -398,6 +415,48 @@ namespace StockNet
             pnlPriceCanvas.Invalidate();
         }
 
+        private void ShowGrids(Graphics g, double VerticalScale, double Range, double MinValue, int BottomPoint)
+        {
+            int NoOfGaps = 5;
+
+            double VerticalGap = Range / NoOfGaps;
+
+            Font fnt = pnlPriceCanvas.Font;
+
+            string strMinValue = MinValue.ToString("N2");
+
+            float TickWordOffset = g.MeasureString(strMinValue, fnt).Height / 2;
+
+            for (int i = 0; i < NoOfGaps; i++)
+            {
+                double GapValue = VerticalGap * (i + 1);
+
+                int YGap = BottomPoint - (int)(VerticalScale * GapValue);
+
+                string TickValue = (GapValue + MinValue).ToString("N2");
+
+                g.DrawString(TickValue, pnlPriceCanvas.Font, Brushes.Black, RightPoint + 5, YGap - TickWordOffset);
+
+                g.DrawLine(Pens.Gray, LeftMargin, YGap, RightPoint + 5, YGap);
+            }
+
+            g.DrawString(strMinValue, pnlPriceCanvas.Font, Brushes.Black, RightPoint + 5, BottomPoint - TickWordOffset);
+        }
+
+        #endregion
+
+        #region Redraw on Resize
+
+        private void pnlPriceCanvas_Resize(object sender, EventArgs e)
+        {
+            pnlPriceCanvas.Invalidate();
+        }
+
+        private void pnlAggreagtor_Resize(object sender, EventArgs e)
+        {
+            pnlAggreagtor.Invalidate();
+        }
+
         #endregion
 
         private void lvwStocks_SelectedIndexChanged(object sender, EventArgs e)
@@ -440,7 +499,9 @@ namespace StockNet
                 RepaintAll();
             }   
         }
-        
+
+        #region Time Line Paint
+
         private void pnlTimeLine_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -507,68 +568,8 @@ namespace StockNet
             }
         }
 
-        private void pnlAggreagtor_Paint(object sender, PaintEventArgs e)
-        {
-            Graphics g = e.Graphics;
-
-            int BottomPoint = SetGridLines(g, sender);
-
-            if (dtData != null)
-            {
-                double MaxValue = (double)dtData.Compute("MAX([AD])", "");
-                double MinValue = (double)dtData.Compute("MIN([AD])", "");
-
-                double Range = (MaxValue - MinValue);
-
-                double VerticalScale = (BottomPoint - TopMargin) / Range;
-
-                ShowGrids(g, VerticalScale, Range, MinValue, BottomPoint);
-
-                GraphicsPath p = new GraphicsPath();
-
-                Point pLast = new Point(LeftMargin, BottomPoint);
-
-                for (int i = 0; i < dtData.Rows.Count; i++)
-                {
-                    DataRow dr = dtData.Rows[i];
-
-                    int X = GetX(i);
-
-                    pLast = SetPoint(BottomPoint, VerticalScale, MinValue, dr, "AD", pLast, p, X);
-                }
-
-                g.DrawPath(new Pen(Color.Black, 2), p);
-            }
-        }
-        
-        private void ShowGrids(Graphics g, double VerticalScale, double Range, double MinValue, int BottomPoint)
-        {
-            int NoOfGaps = 5;
-
-            double VerticalGap = Range / NoOfGaps;
-
-            Font fnt = pnlPriceCanvas.Font;
-
-            string strMinValue = MinValue.ToString("N2");
-
-            float TickWordOffset = g.MeasureString(strMinValue, fnt).Height / 2;
-
-            for (int i = 0; i < NoOfGaps; i++)
-            {
-                double GapValue = VerticalGap * (i + 1);
-
-                int YGap = BottomPoint - (int)(VerticalScale * GapValue);
-
-                string TickValue = (GapValue + MinValue).ToString("N2");
-
-                g.DrawString(TickValue, pnlPriceCanvas.Font, Brushes.Black, RightPoint + 5, YGap - TickWordOffset);
-
-                g.DrawLine(Pens.Gray, LeftMargin, YGap, RightPoint + 5, YGap);
-            }
-
-            g.DrawString(strMinValue, pnlPriceCanvas.Font, Brushes.Black, RightPoint + 5, BottomPoint - TickWordOffset);
-        }
-
+        #endregion
+               
         #region Price 
 
         private void chkMA_CheckedChanged(object sender, EventArgs e)
@@ -618,7 +619,42 @@ namespace StockNet
             }
         }
 
+
         #endregion
+
+        private void pnlAggreagtor_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+
+            int BottomPoint = SetGridLines(g, sender);
+
+            if (dtData != null)
+            {
+                double MaxValue = (double)dtData.Compute("MAX([AD])", "");
+                double MinValue = (double)dtData.Compute("MIN([AD])", "");
+
+                double Range = (MaxValue - MinValue);
+
+                double VerticalScale = (BottomPoint - TopMargin) / Range;
+
+                ShowGrids(g, VerticalScale, Range, MinValue, BottomPoint);
+
+                GraphicsPath p = new GraphicsPath();
+
+                Point pLast = new Point(LeftMargin, BottomPoint);
+
+                for (int i = 0; i < dtData.Rows.Count; i++)
+                {
+                    DataRow dr = dtData.Rows[i];
+
+                    int X = GetX(i);
+
+                    pLast = SetPoint(BottomPoint, VerticalScale, MinValue, dr, "AD", pLast, p, X);
+                }
+
+                g.DrawPath(new Pen(Color.Black, 2), p);
+            }
+        }
 
         #region Oscillation
 
@@ -714,22 +750,10 @@ namespace StockNet
         }
 
         #endregion
+        
+        #region Correlation
 
-        #region Redraw on Resize
-
-        private void pnlPriceCanvas_Resize(object sender, EventArgs e)
-        {
-            pnlPriceCanvas.Invalidate();
-        }
-
-        private void pnlAggreagtor_Resize(object sender, EventArgs e)
-        {
-            pnlAggreagtor.Invalidate();
-        }
-
-        #endregion
-
-        private void cmdCorrelation_Click(object sender, EventArgs e)
+        private void CalculateCorrelations(ListView lvwStocks)
         {
             int n = lvwStocks.Items.Count;
 
@@ -740,7 +764,7 @@ namespace StockNet
             prgbarCorreation.Maximum = n * n;
             prgbarCorreation.Value = 0;
 
-            for(int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
                 ListViewItem itmFirst = lvwStocks.Items[i];
 
@@ -766,13 +790,12 @@ namespace StockNet
                     prgbarCorreation.Value++;
                 }
             }
-            
+
             Cursor = Cursors.Default;
 
             prgbarCorreation.Value = 0;
-
-            pnlHeatmap.Invalidate();
         }
+
         private double CorreationCoefficient(string FirstStock, string SecondStock)
         {
             DataTable FirststockData = GetData(FirstStock);
@@ -812,6 +835,31 @@ namespace StockNet
             r2SqSum /= n;
 
             return (r1r2Sum - r1Sum * r2Sum) / Math.Sqrt((r1SqSum - r1Sum * r1Sum) * (r2SqSum - r2Sum * r2Sum));
+        }
+
+        private void cmdCorrelation_Click(object sender, EventArgs e)
+        {
+            CalculateCorrelations(lvwStocks);
+            pnlHeatmap.Invalidate();
+        }
+
+        private void chkShowCorrelation_CheckedChanged(object sender, EventArgs e)
+        {
+            pnlHeatmap.Invalidate();
+        }        
+
+        #endregion
+
+        #region Heatmp Display
+
+        private void optShowHeatMap_CheckedChanged(object sender, EventArgs e)
+        {
+            pnlHeatmap.Invalidate();
+        }
+
+        private void optShowAdjacencyMatrix_CheckedChanged(object sender, EventArgs e)
+        {
+            pnlHeatmap.Invalidate();
         }
 
         private void pnlHeatmap_Paint(object sender, PaintEventArgs e)
@@ -904,23 +952,6 @@ namespace StockNet
             }
         }
 
-        private void frmStockNet_Resize(object sender, EventArgs e)
-        {
-            pnlHeatmap.Height = pnlHeatmap.Width = Height - 100;
-            pnlHeatmap.Invalidate();
-        }
-
-        private void frmStockNet_Load(object sender, EventArgs e)
-        {
-            cboCorrelationAttribute.SelectedIndex = 0;
-
-            frmStockNet_Resize(sender, e);
-
-            CurrentGraph = new Graph();
-            CurrentGraph.DrawingCanvas = pnlGraph;
-            CurrentGraph.GraphToolTip = toolTipStockNet;
-        }
-
         private void pnlHeatmap_MouseUp(object sender, MouseEventArgs e)
         {
             int HeaderWidth = 100;
@@ -935,26 +966,71 @@ namespace StockNet
             MessageBox.Show(lvwStocks.Items[RowIndex].SubItems[1].Text + ":" + lvwStocks.Items[ColIndex].SubItems[1].Text + " = " + CorrelationCoefficients[RowIndex, ColIndex].ToString());
         }
 
-        private void tabControlStockNet_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        #endregion
 
+        #region Save / Load an Export Option of the Enitre Analysis
+
+        private void cmdSave_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog svdlg = new SaveFileDialog();
+
+            if (svdlg.ShowDialog() == DialogResult.OK)
+            {
+                StreamWriter wrtr = new StreamWriter(svdlg.FileName);
+
+                int n = CurrentGraph.Nodes.Count;
+
+                for (int i = 0; i < n; i++)
+                {
+                    string Coefficients = "";
+
+                    for (int j = 0; j < n; j++)
+                    {
+                        Coefficients += CorrelationCoefficients[i, j].ToString() + ",";
+                    }
+
+                    wrtr.WriteLine(Coefficients.TrimEnd(','));
+                }
+
+                wrtr.Close();
+            }
         }
 
-        private void chkShowCorrelation_CheckedChanged(object sender, EventArgs e)
+        private void cmdLoad_Click(object sender, EventArgs e)
         {
-            pnlHeatmap.Invalidate();
+            OpenFileDialog opndlg = new OpenFileDialog();
+
+            if (opndlg.ShowDialog() == DialogResult.OK)
+            {
+                string[] AllLines = File.ReadAllLines(opndlg.FileName);
+
+                int n = AllLines.Length;
+
+                CorrelationCoefficients = new double[n, n];
+
+                for (int i = 0; i < AllLines.Length; i++)
+                {
+                    string[] values = AllLines[i].Split(',');
+
+                    for (int j = 0; j < values.Length; j++)
+                    {
+                        CorrelationCoefficients[i, j] = double.Parse(values[j]);
+                    }
+                }
+
+                pnlHeatmap.Invalidate();
+            }
         }
 
-        private void optShowHeatMap_CheckedChanged(object sender, EventArgs e)
+        private void cmdExportResult_Click(object sender, EventArgs e)
         {
-            pnlHeatmap.Invalidate();
+            CurrentGraph.ExportNodeDetails();
         }
+        
+        #endregion
 
-        private void optShowAdjacencyMatrix_CheckedChanged(object sender, EventArgs e)
-        {
-            pnlHeatmap.Invalidate();
-        }
-
+        #region Graph Building
+        
         private void nbrThreshhold_ValueChanged(object sender, EventArgs e)
         {
             cmdRefreshNode_Click(null, null);
@@ -1025,19 +1101,27 @@ namespace StockNet
             g.DrawLine(Pens.Black, LeftMargin, TopMargin, LeftMargin, BottomPoint);
 
             int[] DegreeCount = CurrentGraph.DegreeCount;
+            int[] CumulativeDegreeCount = CurrentGraph.CumulativeDegreeCount;
 
             if (DegreeCount != null && DegreeCount.Length > 0)
             {
                 float HorizontalScale = (RightPoint - LeftMargin) / CurrentGraph.MaxDegree;
                 float VerticalScale = (BottomPoint - TopMargin) / CurrentGraph.MaxDegreeCount;
 
+                if (chkCumulative.Checked)
+                    VerticalScale = (BottomPoint - TopMargin) / CumulativeDegreeCount[CumulativeDegreeCount.Length - 1];
+
                 PointF pLast = new PointF(LeftMargin, BottomPoint - DegreeCount[0] * VerticalScale);
 
                 PointF pLastApprox = new PointF(LeftMargin + HorizontalScale, BottomPoint - CurrentGraph.MaxDegreeCount * VerticalScale);
 
+                PointF pLastCum = new PointF(LeftMargin, BottomPoint - CumulativeDegreeCount[0] * VerticalScale);
+
                 GraphicsPath p = new GraphicsPath();
 
                 GraphicsPath pApprox = new GraphicsPath();
+
+                GraphicsPath pCum = new GraphicsPath();
 
                 double ApproxExponent = (double)nbrApproximateExponent.Value;
 
@@ -1049,71 +1133,27 @@ namespace StockNet
 
                     PointF newPoint = new PointF(X, BottomPoint - DegreeCount[i] * VerticalScale);
                     PointF newApproxPoint = new PointF(X, BottomPoint - VApprox * VerticalScale);
+                    PointF newCumPoint = new PointF(X, BottomPoint - CumulativeDegreeCount[i] * VerticalScale);
 
                     p.AddLine(pLast, newPoint);
                     pApprox.AddLine(pLastApprox, newApproxPoint);
+                    pCum.AddLine(pLastCum, newCumPoint);
 
                     pLast = newPoint;
                     pLastApprox = newApproxPoint;
+                    pLastCum = newCumPoint;
                 }
-
-                g.DrawPath(Pens.Red, p);
-                g.DrawPath(Pens.Blue, pApprox);
-            }
-        }
-
-        private void cmdSave_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog svdlg = new SaveFileDialog();
-
-            if (svdlg.ShowDialog() == DialogResult.OK)
-            {
-                StreamWriter wrtr = new StreamWriter(svdlg.FileName);
-
-                int n = CurrentGraph.Nodes.Count;
-
-                for (int i = 0; i < n; i++)
+                
+                if (chkCumulative.Checked)
+                    g.DrawPath(Pens.Green, pCum);
+                else
                 {
-                    string Coefficients = "";
-
-                    for (int j = 0; j < n; j++)
-                    {
-                        Coefficients += CorrelationCoefficients[i, j].ToString() + ",";
-                    }
-
-                    wrtr.WriteLine(Coefficients.TrimEnd(','));
+                    g.DrawPath(Pens.Red, p);
+                    g.DrawPath(Pens.Blue, pApprox);
                 }
-
-                wrtr.Close();
             }
         }
-
-        private void cmdLoad_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog opndlg = new OpenFileDialog();
-
-            if (opndlg.ShowDialog() == DialogResult.OK)
-            {
-                string[] AllLines = File.ReadAllLines(opndlg.FileName);
-
-                int n = AllLines.Length;
-
-                CorrelationCoefficients = new double[n, n];
-
-                for (int i = 0; i < AllLines.Length; i++ )
-                {
-                    string[] values = AllLines[i].Split(',');
-
-                    for (int j = 0; j < values.Length; j++)
-                    {
-                        CorrelationCoefficients[i, j] = double.Parse(values[j]);
-                    }
-                }
-
-                pnlHeatmap.Invalidate();                
-            }
-        }
-
+        
         private void cmdShowPath_Click(object sender, EventArgs e)
         {
             List<int> NodePath = CurrentGraph.Nodes[cboSourceNode.SelectedIndex].GetShortestPath(CurrentGraph.Nodes[cboTargetNode.SelectedIndex]);
@@ -1147,11 +1187,6 @@ namespace StockNet
             }
 
             MessageBox.Show(s);
-        }
-
-        private void cmdExportResult_Click(object sender, EventArgs e)
-        {
-            CurrentGraph.ExportNodeDetails();
         }
 
         private void lvwNodes_SelectedIndexChanged(object sender, EventArgs e)
@@ -1202,6 +1237,167 @@ namespace StockNet
             SizeF TickerSize = g.MeasureString(Ticker, fnt);
 
             g.DrawString(Ticker, fnt, Brushes.Black, MidPoint.X - TickerSize.Width / 2, MidPoint.Y - TickerSize.Height / 2);
+        }
+
+        #endregion
+
+        #region Clustering Routines
+
+        private void ShowMatrixToGrid(double[,] d, DataGridView dbgrdview)
+        {
+            int r = d.GetLength(0);
+            int c = d.GetLength(1);
+
+            dbgrdview.ColumnCount = c;
+
+            dbgrdview.Rows.Clear();
+
+            for (int i = 0; i < r; i++)
+            {
+                DataGridViewRow row = new DataGridViewRow();
+                row.CreateCells(dbgrdview);
+
+                for (int j = 0; j < c; j++)
+                {
+                    row.Cells[j].Value = d[i, j];
+                }
+
+                dbgrdview.Rows.Add(row);
+            }
+        }
+
+        private double[,] Expansion(double[,] d)
+        {
+            int n = d.GetLength(0);
+
+            double[,] m = new double[n, n];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    m[i, j] = 0;
+
+                    for (int k = 0; k < n; k++)
+                    {
+                        m[i, j] = m[i, j] + d[i, k] * d[j, k];
+                    }
+                }
+            }
+
+            return m;
+        }
+
+        private double[,] Inflation(double[,] d)
+        {
+            int n = d.GetLength(0);
+
+            for (int i = 0; i < n; i++)
+            {
+                double Sum = 0;
+
+                for (int j = 0; j < n; j++)
+                {
+                    d[j, i] = d[j, i] * d[j, i];
+                    Sum += d[j, i];
+                }
+
+                for (int j = 0; j < n; j++)
+                {
+                    d[j, i] /= Sum;
+                }
+            }
+
+            return d;
+        }
+
+        private void SetClusters()
+        {
+            double[,] d = (double[,])dbgrdviewInflationMatrix.Tag;
+
+            int n = d.GetLength(0);
+
+            Color[] clr = new Color[5];
+
+            clr[0] = Color.Pink;
+            clr[1] = Color.LightBlue;
+            clr[2] = Color.Green;
+            clr[3] = Color.Orange;
+            clr[4] = Color.Cyan;
+
+            int currentColorCodeIndex = 0;
+
+            for (int i = 0; i < n; i++)
+            {
+                List<Node> ClusterNodes = new List<Node>();
+
+                for (int j = 0; j < n; j++)
+                {
+                    if (d[i, j] > 0.9)
+                    {
+                        Node nd = CurrentGraph.Nodes[j];
+                        ClusterNodes.Add(nd);
+                    }
+                }
+
+                if (ClusterNodes.Count > 1)
+                {
+                    foreach (Node nd in ClusterNodes)
+                    {
+                        nd.CluserColor = clr[currentColorCodeIndex];
+                    }
+
+                    currentColorCodeIndex++;
+                }
+
+                if (currentColorCodeIndex == clr.Length) currentColorCodeIndex = 0;
+            }
+
+            pnlGraph.Invalidate();
+        }
+
+        #endregion
+        
+        #region Clustering Events
+
+        private void cmdInitializeMatrices_Click(object sender, EventArgs e)
+        {
+            ShowMatrixToGrid(CurrentGraph.AdjacencyMatrix, dbgrdviewAdjacencyMatrix);
+
+            double[,] d = CurrentGraph.TransitionMatrix;
+            ShowMatrixToGrid(d, dbgrdviewTransitionMatrix);
+
+            double[,] m = Expansion(d);
+            ShowMatrixToGrid(m, dbgrdviewExapansionMatrix);
+
+            double[,] i = Inflation(m);
+            dbgrdviewInflationMatrix.Tag = i;
+            ShowMatrixToGrid(i, dbgrdviewInflationMatrix);
+        }
+
+        private void cmdVisualizeCluster_Click(object sender, EventArgs e)
+        {
+            SetClusters();
+            tabControlStockNet.SelectedIndex = 2;
+        }
+
+        private void cmdIterate_Click(object sender, EventArgs e)
+        {
+            double[,] d = (double[,])dbgrdviewInflationMatrix.Tag;
+
+            double[,] m = Expansion(d);
+            ShowMatrixToGrid(m, dbgrdviewExapansionMatrix);
+
+            double[,] i = Inflation(m);
+            dbgrdviewInflationMatrix.Tag = i;
+            ShowMatrixToGrid(i, dbgrdviewInflationMatrix);
+        }
+
+        #endregion
+
+        private void chkCumulative_CheckedChanged(object sender, EventArgs e)
+        {
+            pnlDegreeDistribution.Invalidate();
         }
     }
 }
